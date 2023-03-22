@@ -35,5 +35,27 @@ void removeData();
 * 
 */
 void updateData();
+void registerGestor();
 
-#endif
+/**
+ * @brief Fun??o para verificar as informa??es de login do gestor.
+ *
+ * @return void
+ */
+void loginGestor();
+
+/**
+ * @brief Fun??o para mostrar a lista de usu?rios.
+ *
+ * @return void
+ */
+void showUsers();
+
+/**
+ * @brief Fun??o para remover uma conta de usu?rio.
+ *
+ * @return void
+ */
+void removeUser();
+
+#endif //GESTOR_H

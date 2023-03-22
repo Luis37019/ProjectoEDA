@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include "gestor.h"
 #include "cliente.h"
+#include "main.h"
+
+void registerMenu();
+void loginMenu();
+void userMenu();
+void gestorMenu();
 
 int main() {
     int choice = 0;
