@@ -10,10 +10,11 @@
   * @brief Struct representing a user account.
   */
 struct User {
-    unsigned int nif; /**< NIF number of the user (up to 20 characters). */
-    char password[20]; /**< Password of the user (up to 20 characters). */
-    char name[50]; /**< Name of the user (up to 50 characters). */
-    char address[100]; /**< Address of the user (up to 100 characters). */
+    unsigned int nif; /**< N?mero de identifica??o fiscal do usu?rio. */
+    char password[20]; /**< Senha do usu?rio. */
+    char name[50]; /**< Nome do usu?rio. */
+    char address[100]; /**< Endere?o do usu?rio. */
+    float balance; /**< Saldo do usu?rio. */
 };
 
 /**

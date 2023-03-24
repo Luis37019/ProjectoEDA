@@ -1,3 +1,10 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include "gestor.h"
+#include "cliente.h"
+#include <ctype.h>
 /**
 
 * @file main.h
@@ -57,5 +64,17 @@ void showUsers();
  * @return void
  */
 void removeUser();
+/**
+ * @brief Fun??o para para ver balanco do usuario.
+ *
+ * @return void
+ */
+void viewBalance();
+/**
+ * @brief Fun??o para adicionar dinheiro ao balanco na conta.
+ *
+ * @return void
+ */
+void addBalance();
 
 #endif //GESTOR_H

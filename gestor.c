@@ -96,7 +96,7 @@ void loginGestor() {
     }
     else {
         printf("Login sem sucesso...\n");
-    }
+    } 
 }
 void showUsers() {
     // Abrir o arquivo de usu?rios no modo de leitura

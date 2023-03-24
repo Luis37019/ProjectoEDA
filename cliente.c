@@ -13,9 +13,10 @@
 #include "cliente.h"
 
 
- /**
-  * @brief Função para criar conta para cliente.
-  */
+
+/**
+ * @brief Função para criar conta para cliente.
+ */
 void registerUser() {
     /**
      * @brief Estrutura de dados que representa um novo usuário.
@@ -33,6 +34,8 @@ void registerUser() {
     printf("Digite o endereço do usuário (até 100 caracteres): ");
     scanf("\n%[^\n]", newUser.address);
 
+    newUser.balance = 0.0;
+
     // Abrir o arquivo de usuários no modo de escrita
     FILE* usersFile = fopen("users.txt", "a");
 
@@ -43,7 +46,7 @@ void registerUser() {
     }
 
     // Escrever as informações do novo usuário no arquivo
-    fprintf(usersFile, "%u,%s,%s,%s\n", newUser.nif, newUser.password, newUser.name, newUser.address);
+    fprintf(usersFile, "%u,%s,%s,%s,%f\n", newUser.nif, newUser.password, newUser.name, newUser.address, newUser.balance);
 
     // Fechar o arquivo
     fclose(usersFile);
@@ -56,46 +59,37 @@ void registerUser() {
  * @return void
  */
 void loginUser() {
-    unsigned int nif; /**< Número de identificação fiscal do usuário. */
-    char password[20]; /**< Senha do usuário. */
-    char line[50]; /**< Linha atual do arquivo de usuários. */
+    unsigned int nif;
+    char password[20];
+    char line[50];
     printf("Digite o número de NIF (até 20 caracteres): ");
-    scanf("%d", &nif);
+    scanf("%u", &nif);
 
     printf("Digite uma senha (até 20 caracteres): ");
     scanf("\n%s", password);
 
-    // Abrir o arquivo de usuários no modo de leitura
     FILE* usersFile = fopen("users.txt", "r");
 
-    // Verificar se o arquivo foi aberto corretamente
     if (usersFile != NULL) {
         unsigned int savedNif = 0;
         char savedPassword[20] = { 0 };
-        int loginSuccess = 0; /**< Flag para indicar se o login foi bem-sucedido ou não. */
+        int loginSuccess = 0;
 
-        // Ler cada linha do arquivo
         while (fgets(line, 50, usersFile) != NULL) {
-            sscanf(line, "%d,%[^\n]\n", &savedNif, savedPassword);
+            sscanf(line, "%u,%[^,],%*[^\n]", &savedNif, savedPassword);
 
-            // Verificar se as informações de login coincidem
             if (savedNif == nif && strcmp(password, savedPassword) == 0) {
-                printf("Login bem-sucedido. Bem-vindo, %d!\n", nif);
-                loginSuccess = 1; // Atualiza a flag
-
-                // Fechar o arquivo
+                printf("Login bem-sucedido. Bem-vindo, %u!\n", nif);
+                loginSuccess = 1;
                 fclose(usersFile);
-
-                break; // Sai do loop pois o login foi bem-sucedido
+                break;
             }
         }
 
-        // Verificar se o login foi bem-sucedido
         if (!loginSuccess) {
             printf("Login sem sucesso...\n");
         }
 
-        // Fechar o arquivo
         fclose(usersFile);
     }
     else {
@@ -159,8 +153,14 @@ void removeData() {
 
         // Remover o arquivo original e renomear o arquivo temporário
         if (removeSuccess) {
-            remove("users.txt");
-            rename("temp.txt", "users.txt");
+            if (remove("users.txt") != 0) {
+                printf("Erro ao remover arquivo original.\n");
+                return;
+            }
+            if (rename("temp.txt", "users.txt") != 0) {
+                printf("Erro ao renomear arquivo temporário.\n");
+                return;
+            }
             printf("Dados removidos com sucesso.\n");
         }
     }
@@ -242,3 +242,118 @@ void updateData() {
         printf("Não foi possível abrir o arquivo de usuários.\n");
     }
 } 
+/**
+ * @brief Função para visualizar o saldo de um usuário.
+ *
+ * @param nif Número de identificação fiscal do usuário.
+ *
+ * @return void
+ */
+void viewBalance(unsigned int nif) {
+    char line[100]; /**< Linha atual do arquivo de usuários. */
+    char name[50]; /**< Nome do usuário. */
+    double balance = 0; /**< Saldo do usuário. */
+
+    // Abrir o arquivo de usuários no modo de leitura
+    FILE* usersFile = fopen("users.txt", "r");
+
+    // Verificar se o arquivo foi aberto corretamente
+    if (usersFile != NULL) {
+        // Ler cada linha do arquivo
+        while (fgets(line, 100, usersFile) != NULL) {
+            struct User user = { 0 };
+            sscanf(line, "%u,%[^,],%[^,],%[^,],%lf", &user.nif, user.password, user.name, user.address, &user.balance);
+
+            // Verificar se o número de identificação fiscal é o mesmo que o passado como argumento
+            if (user.nif == nif) {
+                // Armazenar o nome e o saldo do usuário
+                strcpy(name, user.name);
+                balance = user.balance;
+                break;
+            }
+        }
+
+        // Fechar o arquivo
+        fclose(usersFile);
+    }
+    else {
+        printf("Erro ao abrir o arquivo de usuários.\n");
+        return;
+    }
+
+    // Mostrar o nome e o saldo do usuário
+    printf("O saldo de %s é R$%.2lf.\n", name, balance);
+}
+
+/**
+ * @brief Função para adicionar saldo a um usuário.
+ *
+ */
+void addBalance() {
+    unsigned int nif; /**< Número de identificação fiscal do usuário */
+    char password[20]; /**< Senha do usuário */
+    char line[100]; /**< Linha atual do arquivo de usuários */
+    char tempLine[100]; /**< Linha temporária a ser escrita no arquivo */
+    float balanceToAdd; /**< Valor a ser adicionado ao saldo */
+    int userFound = 0; /**< Flag para indicar se o usuário foi encontrado */
+
+    printf("Digite o número de NIF (até 20 caracteres): ");
+    scanf("%u", &nif);
+
+    printf("Digite uma senha (até 20 caracteres): ");
+    scanf("\n%s", password);
+
+    // Abrir o arquivo de usuários no modo de leitura e escrita
+    FILE* usersFile = fopen("users.txt", "r+");
+
+    // Verificar se o arquivo foi aberto corretamente
+    if (usersFile != NULL) {
+        // Ler cada linha do arquivo
+        while (fgets(line, 100, usersFile) != NULL) {
+            // Extrair as informações da linha
+            unsigned int savedNif = 0;
+            char savedPassword[20] = { 0 };
+            char name[50] = { 0 };
+            char address[100] = { 0 };
+            float balance = 0.0;
+            sscanf(line, "%u,%[^,],%[^,],%[^,],%f", &savedNif, savedPassword, name, address, &balance);
+
+            // Verificar se as informações de login coincidem
+            if (savedNif == nif && strcmp(password, savedPassword) == 0) {
+                printf("Login bem-sucedido. Bem-vindo, %s!\n", name);
+                userFound = 1; // Atualiza a flag
+
+                // Pedir ao usuário que informe o valor a ser adicionado ao saldo
+                printf("Digite o valor a ser adicionado ao saldo: ");
+                scanf("%f", &balanceToAdd);
+
+                // Adicionar o valor ao saldo atual
+                balance += balanceToAdd;
+
+                // Escrever as informações atualizadas do usuário no arquivo temporário
+                sprintf(tempLine, "%u,%s,%s,%s,%f\n", savedNif, savedPassword, name, address, balance);
+
+                // Voltar para o início da linha do usuário no arquivo
+                fseek(usersFile, strlen(line), SEEK_CUR);
+
+                // Sobrescrever a linha do usuário com as informações atualizadas
+                fputs(tempLine, usersFile);
+
+                // Fechar o arquivo
+                fclose(usersFile);
+
+                // Indicar que a operação foi concluída com sucesso
+                printf("Saldo atualizado com sucesso!\n");
+                return;
+            }
+        }
+
+        // Fechar o arquivo
+        fclose(usersFile);
+    }
+
+    // Se o usuário não foi encontrado, exibir uma mensagem de erro
+    if (!userFound) {
+        printf("Usuário não encontrado ou senha incorreta. Tente novamente.\n");
+    }
+}
