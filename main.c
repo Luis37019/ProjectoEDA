@@ -5,14 +5,17 @@
 #include "gestor.h"
 #include "cliente.h"
 #include "main.h"
+#include "transportes.h"
 
 void registerMenu();
 void loginMenu();
 void userMenu();
 void gestorMenu();
 void MenuBalance();
+void transportesMenu();
 
 int main() {
+
     char choice = '0';
     do {
         system("cls");
@@ -20,7 +23,7 @@ int main() {
         printf("1. Registar\n");
         printf("2. Fazer login\n");
         printf("0. Sair\n");
-        printf("Escolha uma opcao: ");
+        printf("Escolha uma opcao:\n ");
         choice = _getch(); 
         switch (choice) {
         case '1':
@@ -48,7 +51,7 @@ void registerMenu() {
         printf("1. Registar como cliente\n");
         printf("2. Registar como gestor\n");
         printf("0. Voltar ao menu principal\n");
-        printf("Escolha uma opcao: ");
+        printf("Escolha uma opcao:\n ");
         choice = _getch();
         switch (choice) {
         case '1':
@@ -75,7 +78,7 @@ void loginMenu() {
         printf("1. Fazer login como cliente\n");
         printf("2. Fazer login como gestor\n");
         printf("0. Voltar ao menu principal\n");
-        printf("Escolha uma opcao: ");
+        printf("Escolha uma opcao:\n ");
         choice = _getch();
         switch (choice) {
         case '1':
@@ -105,7 +108,7 @@ void userMenu() {
         printf("2. Remover conta\n");
         printf("3. Saldo\n"); 
         printf("0. Fazer logout\n");
-        printf("Escolha uma opcao: ");
+        printf("Escolha uma opcao:\n ");
         choice = _getch();
         switch (choice) {
         case '1':
@@ -128,25 +131,24 @@ void userMenu() {
 }
 void MenuBalance() {
     char choice = '0';
-    float balance = 0;
+    float balance = 0.0; // Initialize balance to 0.0
     do {
         system("cls");
         printf("\nMenu de Saldo:\n");
         printf("1. Visualizar saldo\n");
         printf("2. Adicionar saldo\n");
         printf("0. Voltar ao menu do usuario\n");
-        printf("Escolha uma opcao: ");
+        printf("Escolha uma opcao:\n ");
         choice = _getch();
         switch (choice) {
         case '1':
             printf("\nSaldo atual: %.2f\n", balance);
+            printf("\nPress any key to continue\n");
+            _getch();
             break;
         case '2':
-            printf("\nDigite o valor a ser adicionado: ");
-            float value;
-            scanf("%f", &value);
-            balance += value;
-            printf("Saldo atualizado com sucesso!\n");
+            addBalance(&balance);
+            _getch();
             break;
         case '0':
             printf("Voltar ao menu do usuario.\n");
@@ -164,18 +166,55 @@ void gestorMenu() {
         printf("\nMenu do gestor:\n");
         printf("1. Visualizar lista de clientes\n");
         printf("2. Remover conta de usuario\n");
+        printf("3. Transportes\n");
         printf("0. Fazer logout\n");
-        printf("Escolha uma opcao: ");
+        printf("Escolha uma opcao:\n ");
         choice = _getch();
         switch (choice) {
         case '1':
-            showUsers();
+            visualizarClientes();
             break;
         case '2':
-            removeUser();
+            removerUsuario();
+            break;
+        case '3':
+            transportesMenu();
             break;
         case '0':
             printf("Fazer logout.\n");
+            break;
+        default:
+            printf("Opcao invalida. Tente novamente.\n");
+            break;
+        }
+    } while (choice != '0');
+}
+void transportesMenu() {
+    char choice = '0';
+    do {
+        system("cls");
+        printf("\nMenu de transportes:\n");
+        printf("1. Adicionar transporte\n");
+        printf("2. Remover transporte\n");
+        printf("3. Editar transporte\n");
+        printf("0. Voltar ao menu principal\n");
+        printf("Escolha uma opcao:\n ");
+        choice = _getch();
+        switch (choice) {
+        case '1':
+            // chama a função para adicionar transporte
+            add_transport();
+            break;
+        case '2':
+            // chama a função para remover transporte
+            remove_transport();
+            break;
+        case '3':
+            // chama a função para editar transporte
+            edit_transport();
+            break;
+        case '0':
+            printf("Voltando ao menu principal.\n");
             break;
         default:
             printf("Opcao invalida. Tente novamente.\n");

@@ -180,14 +180,14 @@ void removeUser() {
             // Renomear o arquivo de usu?rios
             if (remove("users.txt") == 0) {
                 if (rename("new_users.txt", "users.txt") != 0) {
-                    printf("Erro ao renomear o arquivo de usu?rios.\n");
+                    printf("Erro ao renomear o arquivo de usuarios.\n");
                 }
                 else {
-                    printf("Usu?rio removido com sucesso.\n");
+                    printf("Usuario removido com sucesso.\n");
                 }
             }
             else {
-                printf("Erro ao remover o usu?rio.\n");
+                printf("Erro ao remover o usuario.\n");
             }
         }
         else {
@@ -197,7 +197,7 @@ void removeUser() {
         }
     }
     else {
-        printf("N?o foi poss?vel abrir o arquivo de usu?rios.\n");
+        printf("Nao foi poss?vel abrir o arquivo de usuarios.\n");
         exit(1);
     }
 }
