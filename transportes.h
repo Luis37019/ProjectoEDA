@@ -23,4 +23,4 @@ void remove_transport(int id);
 
 void edit_transport(int id, transports_data new_transport);
 
-#endif // TRANSPORTES_H#pragma once
+#endif // TRANSPORTES_H

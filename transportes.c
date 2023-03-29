@@ -64,7 +64,8 @@ void remove_transport(int id) {
     remove(TRANSPORTS_FILE);
     rename("temp.txt", TRANSPORTS_FILE);
 }
-void edit_transport(int id, transports_data new_transport) {
+void edit_transport(int id, transports_data new_transport)
+ {
     // Abrir o arquivo para leitura
     FILE* fp = fopen(TRANSPORTS_FILE, "r");
     if (fp == NULL) {
@@ -95,7 +96,7 @@ void edit_transport(int id, transports_data new_transport) {
         }
 
         // Escrever os dados do transporte (atualizados ou n?o) no arquivo tempor?rio
-        fprintf(tmp_fp, "%d %d %d %d %s", transport.id, transport.type, transport.battery, transport.autonomy, transport.geocode);
+        fprintf(tmp_fp, "%d %d %d %d %s\n", transport.id, transport.type, transport.battery, transport.autonomy, transport.geocode);
     }
 
     // Fechar os arquivos

@@ -91,13 +91,13 @@ void addBalance();
  *
  * @return void
  */
-void visualizarClientes();
+void showUsers();
 /**
  * @brief Fun??o para remover a conta do cliente.
  *
  * @return void
  */
-void removerUsuario();
+void removeUser();
 /**
  * @brief Fun??o para adicionar transporte ? base de dados.
  *

@@ -9,13 +9,13 @@
 
 void registerMenu();
 void loginMenu();
-void userMenu();
-void gestorMenu();
 void MenuBalance();
+void userMenu();
 void transportesMenu();
+void gestorMenu();
 
 int main() {
-
+    
     char choice = '0';
     do {
         system("cls");
@@ -24,7 +24,7 @@ int main() {
         printf("2. Fazer login\n");
         printf("0. Sair\n");
         printf("Escolha uma opcao:\n ");
-        choice = _getch(); 
+        choice = _getch();
         switch (choice) {
         case '1':
             registerMenu();
@@ -106,7 +106,7 @@ void userMenu() {
         printf("\nMenu do usuario:\n");
         printf("1. Atualizar dados da conta\n");
         printf("2. Remover conta\n");
-        printf("3. Saldo\n"); 
+        printf("3. Saldo\n");
         printf("0. Fazer logout\n");
         printf("Escolha uma opcao:\n ");
         choice = _getch();
@@ -172,10 +172,10 @@ void gestorMenu() {
         choice = _getch();
         switch (choice) {
         case '1':
-            visualizarClientes();
+            showUsers();
             break;
         case '2':
-            removerUsuario();
+            removeUser();
             break;
         case '3':
             transportesMenu();
@@ -190,35 +190,74 @@ void gestorMenu() {
     } while (choice != '0');
 }
 void transportesMenu() {
+    int id, type, battery, autonomy;
+    char geocode[MAX_GEOCODE_SIZE];
     char choice = '0';
+
     do {
         system("cls");
-        printf("\nMenu de transportes:\n");
+        printf("\nMenu Transportes:\n");
         printf("1. Adicionar transporte\n");
         printf("2. Remover transporte\n");
         printf("3. Editar transporte\n");
-        printf("0. Voltar ao menu principal\n");
+        printf("0. Voltar ao menu anterior\n");
         printf("Escolha uma opcao:\n ");
         choice = _getch();
         switch (choice) {
         case '1':
-            // chama a função para adicionar transporte
-            add_transport();
+            // Get the transport information from the user
+            printf("Id: ");
+            scanf("%d", &id);
+            printf("Tipo (1 para Carro, 2 para Autocarro, 3 para Camioneta): ");
+            scanf("%d", &type);
+            printf("Bateria (em percentagem): ");
+            scanf("%d", &battery);
+            printf("Autonomia (em km): ");
+            scanf("%d", &autonomy);
+            printf("Geocode: ");
+            scanf("%s", geocode);
+
+            // Create the transport variable with the user input
+            transports_data transport = { id, type, battery, autonomy, geocode };
+
+            // Call the add_transport function with the transport variable
+            add_transport(transport);
+            printf("Transporte adicionado com sucesso!\n");
             break;
         case '2':
-            // chama a função para remover transporte
-            remove_transport();
+            printf("Id do transporte a remover: ");
+            scanf("%d", &id);
+            remove_transport(id);
+            printf("Transporte removido com sucesso!\n");
             break;
         case '3':
-            // chama a função para editar transporte
-            edit_transport();
+            // Get the new transport information from the user
+            printf("Id do transporte a editar: ");
+            scanf("%d", &id);
+            printf("Novo tipo (1 para Carro, 2 para Autocarro, 3 para Camioneta): ");
+            scanf("%d", &type);
+            printf("Nova bateria (em percentagem): ");
+            scanf("%d", &battery);
+            printf("Nova autonomia (em km): ");
+            scanf("%d", &autonomy);
+            printf("Nova geocode: ");
+            scanf("%s", geocode);
+
+            // Create the new_transport variable with the user input
+            transports_data new_transport = { id, type, battery, autonomy, geocode };
+
+            // Call the edit_transport function with the id and new_transport variables
+            edit_transport(id, new_transport);
+            printf("Transporte editado com sucesso!\n");
             break;
         case '0':
-            printf("Voltando ao menu principal.\n");
+            printf("Voltar.\n");
             break;
         default:
             printf("Opcao invalida. Tente novamente.\n");
             break;
         }
+        printf("Pressione qualquer tecla para continuar...");
+        _getch();
     } while (choice != '0');
 }
