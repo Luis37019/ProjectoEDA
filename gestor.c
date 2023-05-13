@@ -1,7 +1,9 @@
-#define _CRT_SECURE_NO_WARNINGS
+﻿#define _CRT_SECURE_NO_WARNINGS
+#define GESTOR_FILE "gestor.txt"
+#define GESTOR 0
 /**
  * @file main.c
- * @brief Implementa??o da fun??o principal do programa.
+ * @brief Implementacao da funcao principal do programa.
  */
 
 #include <stdio.h>
@@ -11,193 +13,220 @@
 #include "gestor.h"
 
 
-  /**
-   * @brief Fun??o para criar conta para cliente ou gestor.
-   */
-void registerGestor() {
-    /**
-     * @brief Estrutura de dados que representa um novo usu?rio.
-     */
-    struct Gestor newGestor = { 0 };
-    printf("Digite o n?mero de NIF (at? 20 caracteres): ");
-    scanf("%u", &newGestor.nif);
 
-    printf("Digite uma senha (at? 20 caracteres): ");
-    scanf("%s", newGestor.password);
+Gestor* gestorHead = NULL;
 
-    printf("Digite o nome do usu?rio (at? 50 caracteres): ");
-    scanf(" %[^\n]", newGestor.name);
+void addGestor(unsigned int nif, char password[], char name[], char address[], float balance) {
+    Gestor* newGestor = (Gestor*)malloc(sizeof(Gestor));
+    newGestor->nif = nif;
+    strcpy(newGestor->password, password);
+    strcpy(newGestor->name, name);
+    strcpy(newGestor->address, address);
+    newGestor->balance = balance;
+    newGestor->type = GESTOR;
+    newGestor->next = NULL;
 
-    printf("Digite o endere?o do usu?rio (at? 100 caracteres): ");
-    scanf(" %[^\n]", newGestor.address);
-
-    // Abrir o arquivo de usu?rios no modo de escrita
-    FILE* gestorFile = fopen("gestor.txt", "a");
-
-    // Verificar se o arquivo foi aberto corretamente
-    if (gestorFile == NULL) {
-        printf("Erro ao abrir o arquivo de gestores.\n");
-        return;
-    }
-
-    // Escrever os dados do novo gestor no arquivo
-    fprintf(gestorFile, "%u,%s,%s,%s\n", newGestor.nif, newGestor.password, newGestor.name, newGestor.address);
-
-    // Fechar o arquivo
-    fclose(gestorFile);
-}
-
-/**
- * @brief Fun??o para verificar as informa??es de login do gestor.
- *
- * @return void
- */
-void loginGestor() {
-    unsigned int nif; /**< N?mero de identifica??o fiscal do gestor. */
-    char password[20]; /**< Senha do gestor. */
-    char line[100]; /**< Linha atual do arquivo de gestor. */
-    printf("Digite o n?mero de NIF (at? 20 caracteres): ");
-    scanf("%u", &nif);
-
-    printf("Digite uma senha (at? 20 caracteres): ");
-    scanf("%s", password);
-
-    // Abrir o arquivo de gestores no modo de leitura
-    FILE* gestorFile = fopen("gestor.txt", "r");
-
-    // Verificar se o arquivo foi aberto corretamente
-    if (gestorFile != NULL) {
-        unsigned int savedNif = 0;
-        char savedPassword[20] = { 0 };
-        char savedName[50] = { 0 };
-        char savedAddress[100] = { 0 };
-        int loginSuccess = 0; /**< Flag para indicar se o login foi bem-sucedido ou n?o. */
-
-        // Ler cada linha do arquivo
-        while (fgets(line, 100, gestorFile) != NULL) {
-            sscanf(line, "%u,%[^,],%[^,],%[^\n]\n", &savedNif, savedPassword, savedName, savedAddress);
-
-            // Verificar se as informa??es de login coincidem
-            if (savedNif == nif && strcmp(password, savedPassword) == 0) {
-                printf("Login bem-sucedido. Bem-vindo, %s!\n", savedName);
-                loginSuccess = 1; // Atualiza a flag
-
-                // Fechar o arquivo
-                fclose(gestorFile);
-
-                break; // Sai do loop pois o login foi bem-sucedido
-            }
-        }
-
-        // Verificar se o login foi bem-sucedido
-        if (!loginSuccess) {
-            printf("Login sem sucesso...\n");
-        }
+    if (gestorHead == NULL) {
+        gestorHead = newGestor;
     }
     else {
-        printf("Login sem sucesso...\n");
-    } 
-}
-void showUsers() {
-    // Abrir o arquivo de usu?rios no modo de leitura
-    FILE* usersFile = fopen("users.txt", "r");
+        Gestor* current = gestorHead;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = newGestor;
+    }
 
-    // Verificar se o arquivo foi aberto corretamente
-    if (usersFile == NULL) {
-        printf("Erro ao abrir o arquivo de usu?rios.\n");
+    FILE* fp;
+    fp = fopen(GESTOR_FILE, "a");
+    fprintf(fp, "%u,%s,%s,%s,%.2f\n", nif, password, name, address, balance);
+    fclose(fp);
+}
+void loadGestor() {
+    FILE* fp;
+    fp = fopen(GESTOR_FILE, "r");
+    if (fp == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
         return;
     }
+    while (!feof(fp)) {
+        Gestor* newGestor = (Gestor*)malloc(sizeof(Gestor));
+        fscanf(fp, "%u,%[^,],%[^,],%[^,],%f\n", &newGestor->nif, newGestor->password, newGestor->name, newGestor->address, &newGestor->balance);
+        newGestor->next = NULL;
 
-    printf("Lista de usu?rios:\n");
-
-    // Ler cada linha do arquivo e imprimir as informa??es do usu?rio correspondente
-    char line[100];
-    while (fgets(line, 100, usersFile) != NULL) {
-        unsigned int nif;
-        char password[20];
-        char name[50];
-        char address[100];
-        sscanf(line, "%u,%[^,],%[^,],%[^\n]", &nif, password, name, address);
-        printf("NIF: %u\nSenha: %s\nNome: %s\nEndere?o: %s\n\n", nif, password, name, address);
-    }
-
-    // Fechar o arquivo
-    fclose(usersFile);
-
-}
-/**
- * @brief Fun??o para remover uma conta de cliente.
- *
- * @return void
- */
-void removeUser() {
-    unsigned int nif; /**< N?mero de identifica??o fiscal do usu?rio. */
-    char line[100]; /**< Linha atual do arquivo de usu?rios. */
-
-    printf("Digite o n?mero de NIF do usu?rio que deseja remover: ");
-    scanf("%u", &nif);
-
-    // Abrir o arquivo de usu?rios no modo de leitura
-    FILE* usersFile = fopen("users.txt", "r");
-
-    // Verificar se o arquivo foi aberto corretamente
-    if (usersFile != NULL) {
-        // Abrir um novo arquivo para escrever os usu?rios que n?o ser?o removidos
-        FILE* newFile = fopen("new_users.txt", "w");
-
-        // Verificar se o novo arquivo foi aberto corretamente
-        if (newFile == NULL) {
-            printf("Erro ao criar o novo arquivo de usu?rios.\n");
-            fclose(usersFile);
-            return;
-        }
-
-        int userRemoved = 0; /**< Flag para indicar se o usu?rio foi removido ou n?o. */
-
-        // Ler cada linha do arquivo de usu?rios
-        while (fgets(line, 100, usersFile) != NULL) {
-            unsigned int savedNif;
-            char savedPassword[20] = { 0 };
-            char savedName[50] = { 0 };
-            char savedAddress[100] = { 0 };
-            sscanf(line, "%u,%[^,],%[^,],%[^\n]", &savedNif, savedPassword, savedName, savedAddress);
-
-            // Verificar se o NIF corresponde ao usu?rio a ser removido
-            if (savedNif == nif) {
-                userRemoved = 1;
-            }
-            else {
-                // Escrever a linha no novo arquivo
-                fprintf(newFile, "%u,%s,%s,%s\n", savedNif, savedPassword, savedName, savedAddress);
-            }
-        }
-
-        // Fechar os arquivos
-        fclose(usersFile);
-        fclose(newFile);
-
-        if (userRemoved) {
-            // Renomear o arquivo de usu?rios
-            if (remove("users.txt") == 0) {
-                if (rename("new_users.txt", "users.txt") != 0) {
-                    printf("Erro ao renomear o arquivo de usuarios.\n");
-                }
-                else {
-                    printf("Usuario removido com sucesso.\n");
-                }
-            }
-            else {
-                printf("Erro ao remover o usuario.\n");
-            }
+        if (gestorHead == NULL) {
+            gestorHead = newGestor;
         }
         else {
-            // Remover o novo arquivo de usu?rios, j? que nenhum usu?rio foi removido
-            remove("new_users.txt");
-            printf("Usu?rio n?o encontrado.\n");
+            Gestor* current = gestorHead;
+            while (current->next != NULL) {
+                current = current->next;
+            }
+            current->next = newGestor;
         }
     }
-    else {
-        printf("Nao foi poss?vel abrir o arquivo de usuarios.\n");
-        exit(1);
+    fclose(fp);
+}
+void registerGestor() {
+    unsigned int nif;
+    char password[20];
+    char name[50];
+    char address[100];
+    float balance = 0.0;
+
+
+    printf("Digite o seu NIF: ");
+    scanf("%u", &nif);
+
+    printf("Digite a sua senha: ");
+    scanf("%s", password);
+
+    printf("Digite o seu nome: ");
+    scanf("%s", name);
+
+    printf("Digite o seu endere?o: ");
+    scanf("%s", address);
+
+    addGestor(nif, password, name, address, balance);
+
+    printf("Conta criada com sucesso.\n");
+}
+void cpyGestorData(Gestor* gestor1, Gestor* gestor2) {
+    gestor1->nif = gestor2->nif;
+    strcpy(gestor1->password, gestor2->password);
+    strcpy(gestor1->name, gestor2->name);
+    strcpy(gestor1->address, gestor2->address);
+    gestor1->balance = gestor2->balance;
+    gestor1->next = NULL;
+}
+void loginGestor(Gestor* logged_account ) {
+    unsigned int nif;
+    char password[20];
+
+    printf("Digite o seu NIF: ");
+    scanf("%u", &nif);
+
+    printf("Digite a sua senha: ");
+    scanf("%s", password);
+
+    Gestor* current = gestorHead;
+
+    while (current != NULL) {
+        if (current->nif == nif && strcmp(current->password, password) == 0) {
+            printf("Login realizado com sucesso.\n");
+            // Aqui voc? pode adicionar a logica para permitir que o usu?rio fa?a o que precisa ap?s o login
+            _getch();
+            cpyUserData(logged_account, current);
+            return;
+        }
+        current = current->next;
     }
+
+    printf("NIF ou senha incorretos.\n");
+    _getch();
+}
+void showUsers() {
+    User* current = userHead;
+    printf("Lista de Usu?rios:\n");
+    while (current != NULL) {
+        printf("NIF: %u\n", current->nif);
+        printf("Nome: %s\n", current->name);
+        printf("Endereco: %s\n", current->address);
+        printf("Saldo: %.2f\n", current->balance);
+        printf("\n");
+        current = current->next;
+    }
+}
+
+void removeUsers(unsigned int nif) {
+    User* current = userHead;
+    User* previous = NULL;
+
+    while (current != NULL) {
+        if (current->nif == nif) {
+            if (previous == NULL) {
+                userHead = current->next;
+            }
+            else {
+                previous->next = current->next;
+            }
+            free(current);
+            printf("Usuario com NIF %u removido.\n", nif);
+            return;
+        }
+        previous = current;
+        current = current->next;
+    }
+
+    printf("Usuario com NIF %u nao encontrado.\n", nif);
+}
+void removeGestor(unsigned int nif, char password[]) {
+    Gestor* current = gestorHead;
+    Gestor* prev = NULL;
+
+    FILE* fp;
+    fp = fopen(GESTOR_FILE, "w");
+
+    while (current != NULL) {
+        if (current->nif == nif && strcmp(current->password, password) == 0) {
+            if (prev == NULL) {
+                gestorHead = current->next;
+            }
+            else {
+                prev->next = current->next;
+            }
+            free(current);
+            printf("Gestor removido com sucesso.\n");
+
+            // escreve no arquivo o novo estado da lista encadeada
+            current = gestorHead;
+            while (current != NULL) {
+                fprintf(fp, "%u %s %s %s %.2f\n", current->nif, current->password, current->name, current->address, current->balance);
+                current = current->next;
+            }
+
+            fclose(fp);
+            return;
+        }
+        prev = current;
+        current = current->next;
+    }
+    printf("Gestor não encontrado ou senha incorreta.\n");
+
+    fclose(fp);
+}
+
+void updateGestor(Gestor* logged_account) {
+    FILE* fp;
+    fp = fopen(GESTOR_FILE, "r");
+    if (fp == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    Gestor* current = gestorHead;
+
+    while (current != NULL) {
+        if (current->nif == logged_account->nif) {
+            strcpy(current->password, logged_account->password);
+            strcpy(current->name, logged_account->name);
+            strcpy(current->address, logged_account->address);
+            current->balance = logged_account->balance;
+            break;
+        }
+        current = current->next;
+    }
+
+    fclose(fp);
+
+    fp = fopen(GESTOR_FILE, "w");
+    current = gestorHead;
+    while (current != NULL) {
+        fprintf(fp, "%u,%s,%s,%s,%.2f\n", current->nif, current->password, current->name, current->address, current->balance);
+        current = current->next;
+    }
+    fclose(fp);
+
+    printf("Dados atualizados com sucesso.\n");
+    _getch();
 }

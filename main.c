@@ -1,7 +1,9 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
+#include <string.h>
 #include "gestor.h"
 #include "cliente.h"
 #include "main.h"
@@ -9,14 +11,19 @@
 
 void registerMenu();
 void loginMenu();
-void MenuBalance();
 void userMenu();
-void transportesMenu();
 void gestorMenu();
+void MenuBalance();
+void transportesMenu();
+void updateMenu(loggedInAccount);
+
+User* loggedInAccount = NULL; // declare and initialize loggedInAccount
 
 int main() {
-    
     char choice = '0';
+    loggedInAccount = malloc(sizeof(User));
+    memset(loggedInAccount, 0, sizeof(User));
+
     do {
         system("cls");
         printf("\nMenu:\n");
@@ -33,10 +40,10 @@ int main() {
             loginMenu();
             break;
         case '0':
-            printf("Sair.\n");
+            exit(0);
             break;
         default:
-            printf("Opcao invalida. Tente novamente.\n");
+            printf("Escolha uma opcao valida.\n");
             break;
         }
     } while (choice != '0');
@@ -82,12 +89,16 @@ void loginMenu() {
         choice = _getch();
         switch (choice) {
         case '1':
-            loginUser();
-            userMenu();
+            loginUser(loggedInAccount);
+            if (loggedInAccount->nif != NULL) { // check if user is logged in
+                userMenu();
+            }
             break;
         case '2':
-            loginGestor();
-            gestorMenu();
+            loginGestor(loggedInAccount);
+            if (loggedInAccount->nif != NULL) { // check if user is logged in
+                gestorMenu();
+            }
             break;
         case '0':
             printf("Voltar ao menu principal.\n");
@@ -101,30 +112,39 @@ void loginMenu() {
 
 void userMenu() {
     char choice = '0';
+
     do {
         system("cls");
-        printf("\nMenu do usuario:\n");
+        printf("\nMenu:\n");
         printf("1. Atualizar dados da conta\n");
         printf("2. Remover conta\n");
-        printf("3. Saldo\n");
-        printf("0. Fazer logout\n");
+        printf("3. Ver saldo\n");
+        printf("4. Transportes disponiveis\n");
+        printf("0. Sair\n");
         printf("Escolha uma opcao:\n ");
         choice = _getch();
         switch (choice) {
         case '1':
-            updateData();
+            updateMenu(loggedInAccount);
             break;
         case '2':
-            removeData();
+            removeData(loggedInAccount->nif, loggedInAccount->password);
+            loggedInAccount = NULL;
+            printf("Conta removida com sucesso.\n");
+            _getch();
             break;
         case '3':
-            MenuBalance(); // Chama função MenuBalance
+            MenuBalance();
             break;
+        case '4':
+            searchByGeocode();
+            break;
+
         case '0':
-            printf("Fazer logout.\n");
-            break;
+            loggedInAccount->nif = 0;
+            return;
         default:
-            printf("Opcao invalida. Tente novamente.\n");
+            printf("Escolha uma opcao valida.\n");
             break;
         }
     } while (choice != '0');
@@ -142,12 +162,11 @@ void MenuBalance() {
         choice = _getch();
         switch (choice) {
         case '1':
-            printf("\nSaldo atual: %.2f\n", balance);
-            printf("\nPress any key to continue\n");
+            viewBalance(loggedInAccount); // pass the logged in user's account
             _getch();
             break;
         case '2':
-            addBalance(&balance);
+            //addBalance(loggedInAccount);
             _getch();
             break;
         case '0':
@@ -161,12 +180,15 @@ void MenuBalance() {
 }
 void gestorMenu() {
     char choice = '0';
+    unsigned int nif = 0;
+
     do {
         system("cls");
         printf("\nMenu do gestor:\n");
         printf("1. Visualizar lista de clientes\n");
         printf("2. Remover conta de usuario\n");
         printf("3. Transportes\n");
+        printf("4. Alterar dados da conta\n");
         printf("0. Fazer logout\n");
         printf("Escolha uma opcao:\n ");
         choice = _getch();
@@ -175,13 +197,18 @@ void gestorMenu() {
             showUsers();
             break;
         case '2':
-            removeUser();
+            printf("Digite o NIF do usuario que deseja remover: ");
+            scanf("%u", &nif);
+            removeUsers(nif);
             break;
         case '3':
             transportesMenu();
             break;
+        case '4':
+            updateMenu(loggedInAccount);
+            break;
         case '0':
-            printf("Fazer logout.\n");
+            loggedInAccount->nif = 0;
             break;
         default:
             printf("Opcao invalida. Tente novamente.\n");
@@ -198,66 +225,131 @@ void transportesMenu() {
         system("cls");
         printf("\nMenu Transportes:\n");
         printf("1. Adicionar transporte\n");
-        printf("2. Remover transporte\n");
-        printf("3. Editar transporte\n");
+        printf("2. Editar transporte\n");
+        printf("3. Remover transporte\n");
+        printf("4. Listar transportes\n");
         printf("0. Voltar ao menu anterior\n");
-        printf("Escolha uma opcao:\n ");
+        printf("Escolha uma opcao: ");
         choice = _getch();
         switch (choice) {
         case '1':
             // Get the transport information from the user
-            printf("Id: ");
-            scanf("%d", &id);
-            printf("Tipo (1 para Carro, 2 para Autocarro, 3 para Camioneta): ");
-            scanf("%d", &type);
-            printf("Bateria (em percentagem): ");
-            scanf("%d", &battery);
-            printf("Autonomia (em km): ");
-            scanf("%d", &autonomy);
-            printf("Geocode: ");
-            scanf("%s", geocode);
-
-            // Create the transport variable with the user input
-            transports_data transport = { id, type, battery, autonomy, geocode };
-
-            // Call the add_transport function with the transport variable
-            add_transport(transport);
-            printf("Transporte adicionado com sucesso!\n");
+            addTransport();
             break;
         case '2':
-            printf("Id do transporte a remover: ");
-            scanf("%d", &id);
-            remove_transport(id);
-            printf("Transporte removido com sucesso!\n");
+            //Change transport data
+            updateTransport();
             break;
         case '3':
-            // Get the new transport information from the user
-            printf("Id do transporte a editar: ");
-            scanf("%d", &id);
-            printf("Novo tipo (1 para Carro, 2 para Autocarro, 3 para Camioneta): ");
-            scanf("%d", &type);
-            printf("Nova bateria (em percentagem): ");
-            scanf("%d", &battery);
-            printf("Nova autonomia (em km): ");
-            scanf("%d", &autonomy);
-            printf("Nova geocode: ");
-            scanf("%s", geocode);
-
-            // Create the new_transport variable with the user input
-            transports_data new_transport = { id, type, battery, autonomy, geocode };
-
-            // Call the edit_transport function with the id and new_transport variables
-            edit_transport(id, new_transport);
-            printf("Transporte editado com sucesso!\n");
+            //Remove transport data
+            removeTransport();
+            break;
+        case '4':
+            //List transport data
+            //listTransport();
             break;
         case '0':
-            printf("Voltar.\n");
+            // Exit the loop
             break;
+
         default:
-            printf("Opcao invalida. Tente novamente.\n");
+            printf("Opcao invalida!\n");
             break;
         }
-        printf("Pressione qualquer tecla para continuar...");
-        _getch();
     } while (choice != '0');
+}
+void updateMenu(User* logged_account) {
+    int choice;
+    if (logged_account->type == CLIENT) {
+        do {
+            system("cls");
+            printf("Selecione a opcao:\n");
+            printf("1 - Atualizar senha\n");
+            printf("2 - Atualizar nome\n");
+            printf("3 - Atualizar endereco\n");
+            printf("4 - Atualizar saldo\n");
+            printf("0 - Voltar\n");
+
+            scanf("%d", &choice);
+
+            switch (choice) {
+            case 1:
+                printf("Digite a nova senha: ");
+                scanf("%s", logged_account->password);
+                updateData(logged_account);
+                _getch();
+                break;
+            case 2:
+                printf("Digite o novo nome: ");
+                scanf("%s", logged_account->name);
+                updateData(logged_account);
+                _getch();
+                break;
+            case 3:
+                printf("Digite o novo endereco: ");
+                scanf("%s", logged_account->address);
+                updateData(logged_account);
+                _getch();
+                break;
+            case 4:
+                printf("Digite o novo saldo: ");
+                scanf("%f", &logged_account->balance);
+                updateData(logged_account);
+                _getch();
+                break;
+            case 0:
+                return;
+            default:
+                printf("Opcao invalida.\n");
+                _getch();
+                break;
+            }
+        } while (1);
+    }
+    else if (logged_account->type == GESTOR) {
+        do {
+            system("cls");
+            printf("Selecione a opcao:\n");
+            printf("1 - Atualizar senha\n");
+            printf("2 - Atualizar nome\n");
+            printf("3 - Atualizar endereco\n");
+            printf("4 - Atualizar saldo\n");
+            printf("0 - Voltar\n");
+
+            scanf("%d", &choice);
+
+            switch (choice) {
+            case 1:
+                printf("Digite a nova senha: ");
+                scanf("%s", logged_account->password);
+                updateGestor(logged_account);
+                _getch();
+                break;
+            case 2:
+                printf("Digite o novo nome: ");
+                scanf("%s", logged_account->name);
+                updateGestor(logged_account);
+                _getch();
+                break;
+            case 3:
+                printf("Digite o novo endereco: ");
+                scanf("%s", logged_account->address);
+                updateGestor(logged_account);
+                _getch();
+                break;
+            case 4:
+                printf("Digite o novo saldo: ");
+                scanf("%f", &logged_account->balance);
+                updateGestor(logged_account);
+                _getch();
+                break;
+            case 0:
+                return;
+            default:
+                printf("Opcao invalida.\n");
+                _getch();
+                break;
+            }
+        } while (1);
+    }
 }

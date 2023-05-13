@@ -8,7 +8,6 @@
 #include "transportes.h"
 
 /**
-
 * @file main.h
 * @brief Arquivo de cabe?alho contendo a defini??o das fun??es do programa.
 *
@@ -18,93 +17,89 @@
 #define MAIN_H
 
 /**
-
-* @brief Fun??o que permite o registro de um novo usu?rio no sistema.
+* @brief Funcao que permite o registro de um novo usu?rio no sistema.
 *
 */
 void registerUser();
 
 /**
-
-* @brief Fun??o que permite o login de um usu?rio j? cadastrado no sistema.
+* @brief Funcao que permite o login de um usu?rio j? cadastrado no sistema.
 *
 */
-void loginUser();
+void loginUser(User* logged_account);
 
 /**
-
-* @brief Fun??o que permite a remo??o dos dados de um usu?rio do sistema.
+* @brief Funcao que permite a remo??o dos dados de um usu?rio do sistema.
 *
 */
-void removeData();
+void removeData(unsigned int nif, char password[]);
 
 /**
-
-* @brief Fun??o que permite a atualiza??o dos dados de um usu?rio do sistema.
+* @brief Funcao que permite a atualiza??o dos dados de um usu?rio do sistema.
 *
 */
-void updateData();
+void updateData(loggedInAccount);
 
 /**
- * @brief Fun??o para registrar um novo gestor no sistema.
+ * @brief Funcao para registrar um novo gestor no sistema.
  *
  * @return void
  */
 void registerGestor();
 
 /**
- * @brief Fun??o para verificar as informa??es de login do gestor.
+ * @brief Funcao para verificar as informa??es de login do gestor.
  *
  * @return void
  */
-void loginGestor();
+void loginGestor(Gestor* logged_account);
 
 /**
- * @brief Fun??o para mostrar a lista de usu?rios.
+ * @brief Funcao para mostrar a lista de usu?rios.
  *
  * @return void
  */
 void showUsers();
 
 /**
- * @brief Fun??o para remover uma conta de usu?rio.
+ * @brief Funcao para remover uma conta de usu?rio.
  *
  * @return void
  */
-void removeUser();
+void removeUsers(unsigned int nif);
 
 /**
- * @brief Fun??o para ver o saldo do usu?rio.
+ * @brief Funcao para ver o saldo do usu?rio.
  *
  * @return void
  */
-void viewBalance();
+void viewBalance(loggedInAccount);
 
 /**
- * @brief Fun??o para adicionar dinheiro ao saldo na conta do usu?rio.
+ * @brief Funcao para adicionar dinheiro ao saldo na conta do usu?rio.
  *
  * @return void
  */
-void addBalance();
+void addBalance(loggedInAccount);
 /**
- * @brief Fun??o para visualizar lista de clientes.
+ * @brief Funcao para visualizar lista de clientes.
  *
  * @return void
  */
 void showUsers();
 /**
- * @brief Fun??o para remover a conta do cliente.
+ * @brief Funcao para remover a conta do cliente.
  *
  * @return void
  */
 void removeUser();
 /**
- * @brief Fun??o para adicionar transporte ? base de dados.
+ * @brief Funcao para adicionar transporte ? base de dados.
  *
  * @param transport o transporte a ser adicionado
  * @return void
  */
-void add_transport(transports_data transport);
+void add_transport();
 
 /**
  * @brief Fun??o para remover transporte da base de dados.
@@ -112,7 +107,7 @@ void add_transport(transports_data transport);
  * @param id o id do transporte a ser removido
  * @return void
  */
-void remove_transport(int id);
+void removeTransport();
 
 /**
  * @brief Fun??o para editar transporte na base de dados.
@@ -121,6 +116,9 @@ void remove_transport(int id);
  * @param new_transport o novo transporte
  * @return void
  */
-void edit_transport(int id, transports_data new_transport);
+void updateTransport();
+void searchByGeocode();
+void updateGestor(loggedInAccount);
+void searchByGeocode();
 
 #endif //MAIN_H

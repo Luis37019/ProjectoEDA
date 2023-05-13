@@ -1,40 +1,28 @@
-/**
- * @file account.h
- * @brief Header file for account management.
- */
+#ifndef CLIENTE_H
+#define CLIENTE_H
+#define CLIENT 0
+typedef struct User User;
 
-#ifndef ACCOUNT_H
-#define ACCOUNT_H
-
- /**
-  * @brief Struct representing a user account.
-  */
 struct User {
-    unsigned int nif; /**< N?mero de identifica??o fiscal do usu?rio. */
-    char password[20]; /**< Senha do usu?rio. */
-    char name[50]; /**< Nome do usu?rio. */
-    char address[100]; /**< Endere?o do usu?rio. */
-    float balance; /**< Saldo do usu?rio. */
+    unsigned int nif;
+    char password[20];
+    char name[50];
+    char address[100];
+    float balance;
+    int type;
+    struct User* next;
 };
 
-/**
- * @brief Register a new user account.
- */
+extern User* userHead;
+
+void addUser(unsigned int nif, char password[], char name[], char address[], float balance);
 void registerUser();
 
-/**
- * @brief Login to an existing user account.
- */
-void loginUser();
-
-/**
- * @brief Remove an existing user account.
- */
-void removeData();
-
-/**
- * @brief Update the information of an existing user account.
- */
-void updateData();
+void loginUser(User* logged_account);
+void removeData(unsigned int nif, char password[]);
+void updateData(User* logged_account);
+void cpyUserData(User* user1, User* user2);
+void addBalance(unsigned int nif, float value);
+void viewBalance(User* user);
 
 #endif

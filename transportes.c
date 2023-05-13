@@ -1,109 +1,280 @@
-#define _CRT_SECURE_NO_WARNINGS
+﻿#define _CRT_SECURE_NO_WARNINGS
+#define TRANSPORT_FILE "transportes.txt"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "transportes.h"
+#include "cliente.h"
 
-#define TRANSPORTS_FILE "transports.txt"
-#define MAX_GEOCODE_SIZE 100
+#define MAX_TRANSPORTS 100
+#define BICYCLE 0
+#define SCOOTER 1
 
-typedef struct transports_data {
-    int id;
-    int type;
-    int battery;
-    int autonomy;
+transport* transportHead = NULL;
+
+void cpy_transport(transport* transport1, transport* transport2) {
+    if (transport1 != NULL && transport2 != NULL) {
+        transport1->id = transport2->id;
+        transport1->type = transport2->type;
+        transport1->battery = transport2->battery;
+        transport1->autonomy = transport2->autonomy;
+        strcpy(transport1->geocode, transport2->geocode);
+    }
+}
+void addTransport() {
+    int id, type, battery, autonomy;
     char geocode[MAX_GEOCODE_SIZE];
 
-} transports_data;
+    // Get the transport information from the user
+    printf("Id: ");
+    scanf("%d", &id);
 
-void add_transport(transports_data transport) {
-    // Abrir o arquivo para escrita, adicionando no final do arquivo
-    FILE* fp = fopen(TRANSPORTS_FILE, "a");
-    if (fp == NULL) {
-        printf("Erro ao abrir arquivo!\n");
+    printf("Tipo (0 para Bicicleta, 1 para Scooter): ");
+    scanf("%d", &type);
+    if (type != BICYCLE && type != SCOOTER) {
+        printf("Tipo de transporte inválido!\n");
         return;
     }
 
-    // Escrever os dados do transporte no arquivo
-    fprintf(fp, "%d %d %d %d %s\n", transport.id, transport.type, transport.battery, transport.autonomy, transport.geocode);
-
-    // Fechar o arquivo
-    fclose(fp);
-}
-void remove_transport(int id) {
-    // Abrir o arquivo para leitura
-    FILE* fp = fopen(TRANSPORTS_FILE, "r");
-    if (fp == NULL) {
-        printf("Erro ao abrir arquivo!\n");
+    printf("Bateria (em percentagem): ");
+    scanf("%d", &battery);
+    if (battery < 0 || battery > 100) {
+        printf("Valor de bateria inválido!\n");
         return;
     }
 
-    // Abrir um novo arquivo tempor?rio para escrita
-    FILE* tmp_fp = fopen("temp.txt", "w");
-    if (tmp_fp == NULL) {
-        printf("Erro ao criar arquivo tempor?rio!\n");
-        fclose(fp);
+    printf("Autonomia (em km): ");
+    scanf("%d", &autonomy);
+    if (autonomy < 0) {
+        printf("Valor de autonomia inválido!\n");
         return;
     }
 
-    // Ler linha por linha do arquivo original e copiar para o arquivo tempor?rio, exceto as linhas com o id do transporte a ser removido
-    char line[1024];
-    while (fgets(line, sizeof(line), fp)) {
-        transports_data transport;
-        sscanf(line, "%d %d %d %d %s", &transport.id, &transport.type, &transport.battery, &transport.autonomy, transport.geocode);
+    printf("Geocode: ");
+    scanf("%s", geocode);
 
-        if (transport.id != id) {
-            fprintf(tmp_fp, "%d %d %d %d %s", transport.id, transport.type, transport.battery, transport.autonomy, transport.geocode);
+    // Create the transport variable with the user input
+    transport* new_transport = (transport*)malloc(sizeof(transport));
+    if (new_transport == NULL) {
+        printf("Erro ao alocar memória!\n");
+        return;
+    }
+
+    new_transport->id = id;
+    new_transport->type = type;
+    new_transport->battery = battery;
+    new_transport->autonomy = autonomy;
+    strcpy(new_transport->geocode, geocode);
+
+    // Add the new transport to the linked list of transports
+    new_transport->next = NULL;
+    if (transportHead == NULL) {
+        transportHead = new_transport;
+    }
+    else {
+        transport* current = transportHead;
+        while (current->next != NULL) {
+            current = current->next;
         }
+        current->next = new_transport;
     }
 
-    // Fechar os arquivos
-    fclose(fp);
-    fclose(tmp_fp);
+    // Save the transport information to the file
+    FILE* file = fopen(TRANSPORT_FILE, "a");
+    if (file != NULL) {
+        fprintf(file, "%d %d %d %d %s\n", id, type, battery, autonomy, geocode);
+        fclose(file);
+    }
 
-    // Remover o arquivo original e renomear o arquivo tempor?rio para o nome original
-    remove(TRANSPORTS_FILE);
-    rename("temp.txt", TRANSPORTS_FILE);
+    printf("Transporte adicionado com sucesso!\n");
 }
-void edit_transport(int id, transports_data new_transport)
- {
-    // Abrir o arquivo para leitura
-    FILE* fp = fopen(TRANSPORTS_FILE, "r");
-    if (fp == NULL) {
-        printf("Erro ao abrir arquivo!\n");
-        return;
-    }
 
-    // Abrir um novo arquivo tempor?rio para escrita
-    FILE* tmp_fp = fopen("temp.txt", "w");
-    if (tmp_fp == NULL) {
-        printf("Erro ao criar arquivo tempor?rio!\n");
-        fclose(fp);
-        return;
-    }
+transport* searchTransport(int id) {
+    transport* current = transportHead;
 
-    // Ler linha por linha do arquivo original e copiar para o arquivo tempor?rio, atualizando as informa??es do transporte com o ID correspondente
-    char line[1024];
-    while (fgets(line, sizeof(line), fp)) {
-        transports_data transport;
-        sscanf(line, "%d %d %d %d %s", &transport.id, &transport.type, &transport.battery, &transport.autonomy, transport.geocode);
-
-        if (transport.id == id) {
-            // Atualizar os dados do transporte
-            transport.type = new_transport.type;
-            transport.battery = new_transport.battery;
-            transport.autonomy = new_transport.autonomy;
-            strcpy(transport.geocode, new_transport.geocode);
+    while (current != NULL) {
+        if (current->id == id) {
+            return current;
         }
 
-        // Escrever os dados do transporte (atualizados ou n?o) no arquivo tempor?rio
-        fprintf(tmp_fp, "%d %d %d %d %s\n", transport.id, transport.type, transport.battery, transport.autonomy, transport.geocode);
+        current = current->next;
     }
 
-    // Fechar os arquivos
-    fclose(fp);
-    fclose(tmp_fp);
+    FILE* file = fopen(TRANSPORT_FILE, "r");
+    if (file != NULL) {
+        transport* temp = (transport*)malloc(sizeof(transport));
 
-    // Remover o arquivo original e renomear o arquivo tempor?rio para o nome original
-    remove(TRANSPORTS_FILE);
-    rename("temp.txt", TRANSPORTS_FILE);
+        while (fscanf(file, "%d %d %d %d %s", &temp->id, &temp->type, &temp->battery, &temp->autonomy, temp->geocode) == 5) {
+            if (temp->id == id) {
+                fclose(file);
+                return temp;
+            }
+        }
+
+        fclose(file);
+        free(temp);
+    }
+
+    return NULL;
+}
+void updateTransport() {
+    int id;
+    printf("ID do transporte a ser editado: ");
+    scanf("%d", &id);
+    getchar(); // Consumir o caractere de nova linha pendente no buffer
+
+    transport* foundTransport = searchTransport(id);
+    if (foundTransport != NULL) {
+        int type, battery, autonomy;
+        char geocode[MAX_GEOCODE_SIZE], input[MAX_GEOCODE_SIZE];
+
+        printf("Tipo (0 para Bicicleta, 1 para Scooter): ");
+        fgets(input, MAX_GEOCODE_SIZE, stdin);
+        type = atoi(input);
+
+        printf("Bateria (em percentagem): ");
+        fgets(input, MAX_GEOCODE_SIZE, stdin);
+        battery = atoi(input);
+
+        printf("Autonomia (em km): ");
+        fgets(input, MAX_GEOCODE_SIZE, stdin);
+        autonomy = atoi(input);
+
+        printf("Geocode: ");
+        fgets(geocode, MAX_GEOCODE_SIZE, stdin);
+        geocode[strcspn(geocode, "\n")] = '\0'; // Remove o caractere de nova linha
+
+        foundTransport->type = type;
+        foundTransport->battery = battery;
+        foundTransport->autonomy = autonomy;
+        strcpy(foundTransport->geocode, geocode);
+
+        // Atualizar o arquivo de texto
+        FILE* file = fopen(TRANSPORT_FILE, "w");
+        if (file != NULL) {
+            transport* temp = transportHead;
+            while (temp != NULL) {
+                fprintf(file, "%d %d %d %d %s\n", temp->id, temp->type, temp->battery, temp->autonomy, temp->geocode);
+                temp = temp->next;
+            }
+            fclose(file);
+        }
+
+        printf("Transporte editado com sucesso!\n");
+    }
+    else {
+        printf("Transporte nao encontrado!\n");
+    }
+}
+void removeTransport() {
+    int id;
+    printf("ID do transporte a ser removido: ");
+    scanf("%d", &id);
+
+    transport* current = transportHead;
+    transport* previous = NULL;
+
+    while (current != NULL) {
+        if (current->id == id) {
+            if (previous == NULL) {
+                // Removing the head of the list
+                transportHead = current->next;
+            }
+            else {
+                previous->next = current->next;
+            }
+
+            // Atualizar o arquivo de texto
+            FILE* file = fopen(TRANSPORT_FILE, "w");
+            if (file != NULL) {
+                transport* temp = transportHead;
+                while (temp != NULL) {
+                    fprintf(file, "%d %d %d %d %s\n", temp->id, temp->type, temp->battery, temp->autonomy, temp->geocode);
+                    temp = temp->next;
+                }
+                fclose(file);
+            }
+
+            printf("Transporte removido com sucesso!\n");
+            free(current);
+            return;
+        }
+
+        previous = current;
+        current = current->next;
+    }
+
+    printf("Transporte nao encontrado!\n");
+}
+void searchByGeocode() {
+    char geocode[MAX_GEOCODE_SIZE];
+    printf("Geocode: ");
+    scanf("%s", geocode);
+
+    transport* current = transportHead;
+    transport* resultsHead = NULL;
+    transport* resultsTail = NULL;
+
+    // Encontrar os transportes com o geocode fornecido
+    while (current != NULL) {
+        if (strcmp(current->geocode, geocode) == 0) {
+            transport* new_result = (transport*)malloc(sizeof(transport));
+            cpy_transport(new_result, current);
+            new_result->next = NULL;
+
+            if (resultsHead == NULL) {
+                resultsHead = new_result;
+                resultsTail = new_result;
+            }
+            else {
+                resultsTail->next = new_result;
+                resultsTail = new_result;
+            }
+        }
+
+        current = current->next;
+    }
+
+    // Verificar se não foram encontrados transportes
+    if (resultsHead == NULL) {
+        printf("Nenhum transporte encontrado com o geocode '%s'\n", geocode);
+        return;
+    }
+
+    // Ordenar os transportes em ordem decrescente de autonomia
+    int swapped;
+    do {
+        swapped = 0;
+        transport* ptr1 = resultsHead;
+        transport* ptr2 = resultsHead->next;
+
+        while (ptr2 != NULL) {
+            if (ptr1->autonomy < ptr2->autonomy) {
+                transport temp;
+                cpy_transport(&temp, ptr1);
+                cpy_transport(ptr1, ptr2);
+                cpy_transport(ptr2, &temp);
+                swapped = 1;
+            }
+
+            ptr1 = ptr1->next;
+            ptr2 = ptr2->next;
+        }
+    } while (swapped);
+
+    // Exibir os transportes encontrados
+    printf("Transportes encontrados com o geocode '%s':\n", geocode);
+    current = resultsHead;
+    while (current != NULL) {
+        printf("ID: %d, Tipo: %d, Bateria: %d%%, Autonomia: %dkm\n", current->id, current->type, current->battery, current->autonomy);
+        current = current->next;
+    }
+
+    // Liberar a memória alocada para os resultados
+    current = resultsHead;
+    while (current != NULL) {
+        transport* next = current->next;
+        free(current);
+        current = next;
+    }
 }
