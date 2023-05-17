@@ -24,5 +24,6 @@ void updateData(User* logged_account);
 void cpyUserData(User* user1, User* user2);
 void addBalance(unsigned int nif, float value);
 void viewBalance(User* user);
+void loadUsers();
 
 #endif

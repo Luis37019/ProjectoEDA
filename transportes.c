@@ -241,26 +241,7 @@ void searchByGeocode() {
         return;
     }
 
-    // Ordenar os transportes em ordem decrescente de autonomia
-    int swapped;
-    do {
-        swapped = 0;
-        transport* ptr1 = resultsHead;
-        transport* ptr2 = resultsHead->next;
-
-        while (ptr2 != NULL) {
-            if (ptr1->autonomy < ptr2->autonomy) {
-                transport temp;
-                cpy_transport(&temp, ptr1);
-                cpy_transport(ptr1, ptr2);
-                cpy_transport(ptr2, &temp);
-                swapped = 1;
-            }
-
-            ptr1 = ptr1->next;
-            ptr2 = ptr2->next;
-        }
-    } while (swapped);
+    // Ordenar os transportes em ordem decrescente de autonomia (opcional)
 
     // Exibir os transportes encontrados
     printf("Transportes encontrados com o geocode '%s':\n", geocode);

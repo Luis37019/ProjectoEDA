@@ -52,25 +52,34 @@ void loadUsers() {
         printf("Erro ao abrir o arquivo.\n");
         return;
     }
-    while (!feof(fp)) {
-        User* newUser = (User*)malloc(sizeof(User));
-        fscanf(fp, "%u %[^\n]s", &newUser->nif, newUser->password);
-        fscanf(fp, " %[^\n]s", newUser->name);
-        fscanf(fp, " %[^\n]s", newUser->address);
-        fscanf(fp, " %f\n", &newUser->balance);
-        newUser->next = NULL;
 
-        if (userHead == NULL) {
-            userHead = newUser;
-        }
-        else {
-            User* current = userHead;
-            while (current->next != NULL) {
-                current = current->next;
+    User* aux_buf = (User*)malloc(sizeof(User));
+
+    while (fscanf(fp, "%u,%[^,],%[^,],%[^,],%f\n", &aux_buf->nif, aux_buf->password, aux_buf->name, aux_buf->address, &aux_buf->balance) != EOF) {
+        User* newUser = (User*)malloc(sizeof(User));
+
+        if (newUser != NULL) {
+            newUser->nif = aux_buf->nif;
+            strcpy(newUser->password, aux_buf->password);
+            strcpy(newUser->name, aux_buf->name);
+            strcpy(newUser->address, aux_buf->address);
+            newUser->balance = aux_buf->balance;
+            newUser->next = NULL;
+
+            if (userHead == NULL) {
+                userHead = newUser;
             }
-            current->next = newUser;
+            else {
+                User* current = userHead;
+                while (current->next != NULL) {
+                    current = current->next;
+                }
+                current->next = newUser;
+            }
         }
+        
     }
+    free(aux_buf);
     fclose(fp);
 }
 
@@ -248,7 +257,7 @@ void addBalance(unsigned int nif, float amount) {
     }
     current = userHead;
     while (current != NULL) {
-        fprintf(fp, "%u %s %s %s %.2f\n", current->nif, current->password, current->name, current->address, current->balance);
+        fprintf(fp, "%u,%s,%s,%s,%.2f\n", current->nif, current->password, current->name, current->address, current->balance);
         current = current->next;
     }
     fclose(fp);

@@ -24,6 +24,9 @@ int main() {
     loggedInAccount = malloc(sizeof(User));
     memset(loggedInAccount, 0, sizeof(User));
 
+    loadGestor();
+    loadUsers();
+
     do {
         system("cls");
         printf("\nMenu:\n");
