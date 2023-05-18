@@ -18,7 +18,7 @@ void registerGestor();
 void loginGestor(Gestor* logged_account);
 void showUsers();
 void removeUsers(unsigned int nif);
-void updateGestor(Gestor* Gestor);
+void updateGestor(Gestor* logged_account);
 void loadGestor();
 
 #endif

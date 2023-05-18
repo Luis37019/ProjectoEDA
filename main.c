@@ -15,7 +15,9 @@ void userMenu();
 void gestorMenu();
 void MenuBalance();
 void transportesMenu();
-void updateMenu(loggedInAccount);
+void updateUserMenu(User* logged_account);
+void updateGestorMenu(Gestor* logged_account);
+
 
 User* loggedInAccount = NULL; // declare and initialize loggedInAccount
 
@@ -128,7 +130,7 @@ void userMenu() {
         choice = _getch();
         switch (choice) {
         case '1':
-            updateMenu(loggedInAccount);
+            updateUserMenu(loggedInAccount);
             break;
         case '2':
             removeData(loggedInAccount->nif, loggedInAccount->password);
@@ -140,9 +142,17 @@ void userMenu() {
             MenuBalance();
             break;
         case '4':
-            searchByGeocode();
-            break;
+        {
+            char geocode[10];  // Supondo que você tenha o geocódigo disponível
 
+            printf("Geocode: ");
+            scanf("%s", geocode);
+            getchar();
+            displayTransportByGeocode(geocode);
+
+            _getch(); // Aguardar a tecla antes de voltar ao menu
+        }
+        break;
         case '0':
             loggedInAccount->nif = 0;
             return;
@@ -208,7 +218,7 @@ void gestorMenu() {
             transportesMenu();
             break;
         case '4':
-            updateMenu(loggedInAccount);
+            updateGestorMenu(loggedInAccount);
             break;
         case '0':
             loggedInAccount->nif = 0;
@@ -237,7 +247,7 @@ void transportesMenu() {
         switch (choice) {
         case '1':
             // Get the transport information from the user
-            addTransport();
+            registerTransport();
             break;
         case '2':
             //Change transport data
@@ -261,98 +271,97 @@ void transportesMenu() {
         }
     } while (choice != '0');
 }
-void updateMenu(User* logged_account) {
+void updateUserMenu(User* logged_account) {
     int choice;
-    if (logged_account->type == CLIENT) {
-        do {
-            system("cls");
-            printf("Selecione a opcao:\n");
-            printf("1 - Atualizar senha\n");
-            printf("2 - Atualizar nome\n");
-            printf("3 - Atualizar endereco\n");
-            printf("4 - Atualizar saldo\n");
-            printf("0 - Voltar\n");
+    do {
+        system("cls");
+        printf("Selecione a opcao:\n");
+        printf("1 - Atualizar senha\n");
+        printf("2 - Atualizar nome\n");
+        printf("3 - Atualizar endereco\n");
+        printf("4 - Atualizar saldo\n");
+        printf("0 - Voltar\n");
 
-            scanf("%d", &choice);
+        scanf("%d", &choice);
 
-            switch (choice) {
-            case 1:
-                printf("Digite a nova senha: ");
-                scanf("%s", logged_account->password);
-                updateData(logged_account);
-                _getch();
-                break;
-            case 2:
-                printf("Digite o novo nome: ");
-                scanf("%s", logged_account->name);
-                updateData(logged_account);
-                _getch();
-                break;
-            case 3:
-                printf("Digite o novo endereco: ");
-                scanf("%s", logged_account->address);
-                updateData(logged_account);
-                _getch();
-                break;
-            case 4:
-                printf("Digite o novo saldo: ");
-                scanf("%f", &logged_account->balance);
-                updateData(logged_account);
-                _getch();
-                break;
-            case 0:
-                return;
-            default:
-                printf("Opcao invalida.\n");
-                _getch();
-                break;
-            }
-        } while (1);
-    }
-    else if (logged_account->type == GESTOR) {
-        do {
-            system("cls");
-            printf("Selecione a opcao:\n");
-            printf("1 - Atualizar senha\n");
-            printf("2 - Atualizar nome\n");
-            printf("3 - Atualizar endereco\n");
-            printf("4 - Atualizar saldo\n");
-            printf("0 - Voltar\n");
+        switch (choice) {
+        case 1:
+            printf("Digite a nova senha: ");
+            scanf("%s", logged_account->password);
+            updateData(logged_account);
+            _getch();
+            break;
+        case 2:
+            printf("Digite o novo nome: ");
+            scanf("%s", logged_account->name);
+            updateData(logged_account);
+            _getch();
+            break;
+        case 3:
+            printf("Digite o novo endereco: ");
+            scanf("%s", logged_account->address);
+            updateData(logged_account);
+            _getch();
+            break;
+        case 4:
+            printf("Digite o novo saldo: ");
+            scanf("%f", &logged_account->balance);
+            updateData(logged_account);
+            _getch();
+            break;
+        case 0:
+            return;
+        default:
+            printf("Opcao invalida.\n");
+            _getch();
+            break;
+        }
+    } while (1);
+}
+void updateGestorMenu(Gestor* logged_account) {
+    int choice;
+    do {
+        system("cls");
+        printf("Selecione a opcao:\n");
+        printf("1 - Atualizar senha\n");
+        printf("2 - Atualizar nome\n");
+        printf("3 - Atualizar endereco\n");
+        printf("4 - Atualizar saldo\n");
+        printf("0 - Voltar\n");
 
-            scanf("%d", &choice);
+        scanf("%d", &choice);
 
-            switch (choice) {
-            case 1:
-                printf("Digite a nova senha: ");
-                scanf("%s", logged_account->password);
-                updateGestor(logged_account);
-                _getch();
-                break;
-            case 2:
-                printf("Digite o novo nome: ");
-                scanf("%s", logged_account->name);
-                updateGestor(logged_account);
-                _getch();
-                break;
-            case 3:
-                printf("Digite o novo endereco: ");
-                scanf("%s", logged_account->address);
-                updateGestor(logged_account);
-                _getch();
-                break;
-            case 4:
-                printf("Digite o novo saldo: ");
-                scanf("%f", &logged_account->balance);
-                updateGestor(logged_account);
-                _getch();
-                break;
-            case 0:
-                return;
-            default:
-                printf("Opcao invalida.\n");
-                _getch();
-                break;
-            }
-        } while (1);
-    }
+        switch (choice) {
+        case 1:
+            printf("Digite a nova senha: ");
+            scanf("%s", logged_account->password);
+            updateGestor(logged_account);
+            _getch();
+            break;
+        case 2:
+            printf("Digite o novo nome: ");
+            scanf("%s", logged_account->name);
+            updateGestor(logged_account);
+            _getch();
+            break;
+        case 3:
+            printf("Digite o novo endereco: ");
+            scanf("%s", logged_account->address);
+            updateGestor(logged_account);
+            _getch();
+            break;
+        case 4:
+            printf("Digite o novo saldo: ");
+            scanf("%f", &logged_account->balance);
+            updateGestor(logged_account);
+            _getch();
+            break;
+        case 0:
+            return;
+        default:
+            printf("Opcao invalida.\n");
+            _getch();
+            break;
+        }
+    } while (1);
 }

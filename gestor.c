@@ -134,7 +134,7 @@ void loginGestor(Gestor* logged_account) {
 			printf("Login realizado com sucesso.\n");
 			// Aqui voc? pode adicionar a logica para permitir que o usu?rio fa?a o que precisa ap?s o login
 			_getch();
-			cpyUserData(logged_account, current);
+			cpyGestorData(logged_account, current);
 			return;
 		}
 		current = current->next;

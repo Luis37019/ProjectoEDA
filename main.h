@@ -99,7 +99,8 @@ void removeUser();
  * @param transport o transporte a ser adicionado
  * @return void
  */
-void add_transport();
+void addTransport(unsigned int id, int type, int battery, int autonomy, const char* geocode);
+
 
 /**
  * @brief Fun??o para remover transporte da base de dados.
@@ -117,8 +118,9 @@ void removeTransport();
  * @return void
  */
 void updateTransport();
-void searchByGeocode();
-void updateGestor(loggedInAccount);
-void searchByGeocode();
+void updateGestor(Gestor* logged_account);
+void loadTransport();
+void displayTransportByGeocode(const char* geocode);
+void registerTransport();
 
 #endif //MAIN_H

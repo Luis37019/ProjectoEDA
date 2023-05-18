@@ -12,22 +12,85 @@
 
 transport* transportHead = NULL;
 
-void cpy_transport(transport* transport1, transport* transport2) {
-    if (transport1 != NULL && transport2 != NULL) {
-        transport1->id = transport2->id;
-        transport1->type = transport2->type;
-        transport1->battery = transport2->battery;
-        transport1->autonomy = transport2->autonomy;
-        strcpy(transport1->geocode, transport2->geocode);
-    }
-}
-void addTransport() {
-    int id, type, battery, autonomy;
-    char geocode[MAX_GEOCODE_SIZE];
 
-    // Get the transport information from the user
+void addTransport(unsigned int id, int type, int battery, int autonomy, const char* geocode) {
+    transport* newtransport = (transport*)malloc(sizeof(transport));
+    newtransport->id = id;
+    newtransport->type = type;
+    newtransport->battery = battery;
+    newtransport->autonomy = autonomy;
+    strcpy(newtransport->geocode, geocode);
+    newtransport->next = NULL;
+
+    if (transportHead == NULL) {
+        transportHead = newtransport;
+    }
+    else {
+        transport* current = transportHead;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = newtransport;
+    }
+
+    FILE* fp;
+    fp = fopen(TRANSPORT_FILE, "a");
+    fprintf(fp, "%u,%d,%d,%d,%s\n", id, type, battery, autonomy, geocode);
+    fclose(fp);
+}
+void loadTransport() {
+    FILE* fp;
+    fp = fopen(TRANSPORT_FILE, "r");
+    if (fp == NULL) {
+        printf("Erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    transport* aux_buf = (transport*)malloc(sizeof(transport));
+
+    while (fscanf(fp, "%u,%d,%d,%d,%s\n",
+        &aux_buf->id,
+        &aux_buf->type,
+        &aux_buf->battery,
+        &aux_buf->autonomy,
+        aux_buf->geocode) != EOF) {
+
+        transport* newtransport = (transport*)malloc(sizeof(transport));
+
+        if (newtransport != NULL) {
+            newtransport->id = aux_buf->id;
+            strcpy(newtransport->type, aux_buf->type);
+            strcpy(newtransport->battery, aux_buf->battery);
+            strcpy(newtransport->autonomy, aux_buf->autonomy);
+            strcpy(newtransport->geocode, aux_buf->geocode);
+            newtransport->next = NULL;
+
+            if (transportHead == NULL) {
+                transportHead = newtransport;
+            }
+            else {
+                transport* current = transportHead;
+                while (current->next != NULL) {
+                    current = current->next;
+                }
+                current->next = newtransport;
+            }
+        }
+
+    }
+    free(aux_buf);
+    fclose(fp);
+}
+void registerTransport() {
+    unsigned int id;
+    int type;
+    int battery;
+    int autonomy;
+    char geocode[MAX_GEOCODE_SIZE];  // Declare geocode como uma matriz de caracteres
+
+    // Obtenha as informações de transporte do usuário
     printf("Id: ");
-    scanf("%d", &id);
+    scanf("%u", &id);
 
     printf("Tipo (0 para Bicicleta, 1 para Scooter): ");
     scanf("%d", &type);
@@ -51,44 +114,21 @@ void addTransport() {
     }
 
     printf("Geocode: ");
-    scanf("%s", geocode);
+    scanf("%s", geocode);  // Use scanf("%s", geocode) para ler uma string
 
-    // Create the transport variable with the user input
-    transport* new_transport = (transport*)malloc(sizeof(transport));
-    if (new_transport == NULL) {
-        printf("Erro ao alocar memória!\n");
-        return;
-    }
+    addTransport(id, type, battery, autonomy, geocode);
 
-    new_transport->id = id;
-    new_transport->type = type;
-    new_transport->battery = battery;
-    new_transport->autonomy = autonomy;
-    strcpy(new_transport->geocode, geocode);
-
-    // Add the new transport to the linked list of transports
-    new_transport->next = NULL;
-    if (transportHead == NULL) {
-        transportHead = new_transport;
-    }
-    else {
-        transport* current = transportHead;
-        while (current->next != NULL) {
-            current = current->next;
-        }
-        current->next = new_transport;
-    }
-
-    // Save the transport information to the file
-    FILE* file = fopen(TRANSPORT_FILE, "a");
-    if (file != NULL) {
-        fprintf(file, "%d %d %d %d %s\n", id, type, battery, autonomy, geocode);
-        fclose(file);
-    }
-
-    printf("Transporte adicionado com sucesso!\n");
+    printf("Transporte adicionado com sucesso.\n");
 }
-
+void cpy_transport(transport* transport1, transport* transport2) {
+    if (transport1 != NULL && transport2 != NULL) {
+        transport1->id = transport2->id;
+        transport1->type = transport2->type;
+        transport1->battery = transport2->battery;
+        transport1->autonomy = transport2->autonomy;
+        strcpy(transport1->geocode, transport2->geocode);
+    }
+}
 transport* searchTransport(int id) {
     transport* current = transportHead;
 
@@ -206,16 +246,12 @@ void removeTransport() {
 
     printf("Transporte nao encontrado!\n");
 }
-void searchByGeocode() {
-    char geocode[MAX_GEOCODE_SIZE];
-    printf("Geocode: ");
-    scanf("%s", geocode);
-
+// Função para pesquisar e encontrar os transportes com base no geocódigo
+transport* searchTransportByGeocode(const char* geocode) {
     transport* current = transportHead;
     transport* resultsHead = NULL;
     transport* resultsTail = NULL;
 
-    // Encontrar os transportes com o geocode fornecido
     while (current != NULL) {
         if (strcmp(current->geocode, geocode) == 0) {
             transport* new_result = (transport*)malloc(sizeof(transport));
@@ -235,17 +271,24 @@ void searchByGeocode() {
         current = current->next;
     }
 
-    // Verificar se não foram encontrados transportes
+    return resultsHead;
+}
+
+// Função para exibir e ordenar os transportes com base no geocódigo
+void displayTransportByGeocode(const char* geocode) {
+    transport* resultsHead = searchTransportByGeocode(geocode);
+
     if (resultsHead == NULL) {
-        printf("Nenhum transporte encontrado com o geocode '%s'\n", geocode);
+        printf("Nenhum transporte encontrado com o geocódigo '%s'\n", geocode);
         return;
     }
 
     // Ordenar os transportes em ordem decrescente de autonomia (opcional)
+    // ...
 
     // Exibir os transportes encontrados
-    printf("Transportes encontrados com o geocode '%s':\n", geocode);
-    current = resultsHead;
+    printf("Transportes encontrados com o geocódigo '%s':\n", geocode);
+    transport* current = resultsHead;
     while (current != NULL) {
         printf("ID: %d, Tipo: %d, Bateria: %d%%, Autonomia: %dkm\n", current->id, current->type, current->battery, current->autonomy);
         current = current->next;
